@@ -1,0 +1,24 @@
+# Code Owners for Project Noah
+# These owners will be requested for review when someone opens a pull request.
+
+# Default owner for everything in the repo
+* @project-noah-maintainer
+
+# API Routes
+/app/api/ @project-noah-maintainer
+
+# Core libraries
+/lib/ @project-noah-maintainer
+
+# Poisson calculations (requires statistical knowledge)
+/lib/poisson/ @project-noah-maintainer
+
+# Frontend UI
+/app/page.tsx @project-noah-maintainer
+
+# Configuration files
+*.config.* @project-noah-maintainer
+.env.local.example @project-noah-maintainer
+
+# Documentation
+*.md @project-noah-maintainer

@@ -1,0 +1,16 @@
+# Ignore artifacts:
+node_modules
+.next
+out
+build
+dist
+coverage
+
+# Ignore all lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Ignore TypeScript build info
+*.tsbuildinfo
+next-env.d.ts
