@@ -181,7 +181,7 @@ export default function Home() {
 
       {!loading && !error && fixtures.length === 0 && (
         <div style={{ textAlign: 'center', color: '#666', padding: '2rem' }}>
-          No fixtures loaded. Select date and league, then click "Hämta matcher".
+          No fixtures loaded. Select date and league, then click &quot;Hämta matcher&quot;.
         </div>
       )}
     </main>
