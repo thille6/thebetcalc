@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Project Noah',
-  description: 'Football match predictions',
+  title: 'TheBetCalc',
+  description: 'Football match predictions and betting calculator',
 };
 
 export default function RootLayout({
