@@ -712,6 +712,85 @@ curl -X POST "http://localhost:3000/api/poisson" \
 - `APISPORTS_ERROR` - Error from external API
 - `INSUFFICIENT_DATA` - Not enough historical matches (need at least 3)
 
+## Testing API-Sports Integration
+
+### Setting Up the API Key
+
+**Locally (Development):**
+
+1. Copy the example file:
+   ```bash
+   cp .env.local.example .env.local
+   ```
+
+2. Add your API key to `.env.local`:
+   ```env
+   APISPORTS_API_KEY=your_actual_api_key_here
+   ```
+
+3. Restart the dev server:
+   ```bash
+   npm run dev
+   ```
+
+**Vercel (Production):**
+
+1. Go to your project dashboard on [vercel.com](https://vercel.com)
+2. Navigate to: **Settings** → **Environment Variables**
+3. Add variable:
+   - **Name**: `APISPORTS_API_KEY`
+   - **Value**: Your API-Sports key
+   - **Environments**: Production, Preview, Development
+4. Redeploy your project
+
+### Testing Endpoints
+
+Once the API key is configured, test these endpoints:
+
+**Health Check** (no API key needed):
+```bash
+curl https://thebetcalc.vercel.app/api/health
+```
+
+**Fixtures** (requires API key):
+```bash
+# Premier League fixtures for a specific date
+curl "https://thebetcalc.vercel.app/api/fixtures?date=2025-01-27&leagueId=39&season=2025"
+
+# La Liga fixtures
+curl "https://thebetcalc.vercel.app/api/fixtures?date=2025-01-27&leagueId=140&season=2025"
+```
+
+**Match Details** (requires API key):
+```bash
+curl "https://thebetcalc.vercel.app/api/match?fixtureId=1234567"
+```
+
+**Poisson Prediction** (requires API key):
+```bash
+curl -X POST "https://thebetcalc.vercel.app/api/poisson" \
+  -H "Content-Type: application/json" \
+  -d '{"fixtureId": 1234567, "window": 10, "useHomeAwaySplit": true}'
+```
+
+### Caching & Rate Limits
+
+**Cache TTL:**
+- **Fixtures**: 10 minutes per (date, leagueId, season)
+- **Match Details**: 30 minutes per fixtureId
+- **Historical Data**: 10 minutes per (teamId, leagueId, season, window)
+
+**Rate Limit Safety:**
+- Use the cache effectively to minimize API calls
+- API-Sports free tier: typically 100 requests/day
+- Cached responses include `"cached": true` flag
+- In-memory cache resets on server restart/cold start
+
+**Best Practices:**
+- Test with recent dates to get valid fixture IDs
+- Use common leagues (Premier League = 39, La Liga = 140, etc.)
+- Check API-Sports quota at: https://dashboard.api-football.com/
+
 ## Poisson Distribution Model
 
 This application uses the Poisson distribution to predict football match outcomes. The Poisson distribution is a statistical model that predicts the probability of a given number of events occurring in a fixed interval.
