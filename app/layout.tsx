@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'TheBetCalc',
+  title: 'TheBetCalc - Football Predictions',
   description: 'Football match predictions and betting calculator',
 };
 
