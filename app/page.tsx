@@ -20,7 +20,7 @@ export default function Home() {
   
   const [date, setDate] = useState(today);
   const [leagueId, setLeagueId] = useState('39');
-  const [season, setSeason] = useState('2026');
+  const [season, setSeason] = useState('2024');
   const [fixtures, setFixtures] = useState<FixtureSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -105,7 +105,7 @@ export default function Home() {
               type="number"
               value={season}
               onChange={(e) => setSeason(e.target.value)}
-              placeholder="2026"
+              placeholder="2024"
               style={{
                 padding: '0.5rem',
                 borderRadius: '4px',
