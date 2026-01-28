@@ -20,7 +20,7 @@ export default function Home() {
   
   const [date, setDate] = useState(today);
   const [leagueId, setLeagueId] = useState('39');
-  const [season, setSeason] = useState('2024');
+  const [season, setSeason] = useState('2026');
   const [fixtures, setFixtures] = useState<FixtureSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
