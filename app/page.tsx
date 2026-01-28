@@ -16,13 +16,11 @@ interface FixtureSummary {
 }
 
 export default function Home() {
-  // Free API plan: dates 2026-01-27 to 2026-01-29, seasons 2022-2024
-  // Use today's date with season 2024
-  const today = new Date().toISOString().split('T')[0];
-  
-  const [date, setDate] = useState(today);
+  // Free API plan: Only historical data from seasons 2022-2024
+  // Using a date from Premier League 2023-24 season finale
+  const [date, setDate] = useState('2024-05-19');
   const [leagueId, setLeagueId] = useState('39');
-  const [season, setSeason] = useState('2024');
+  const [season, setSeason] = useState('2023');
   const [fixtures, setFixtures] = useState<FixtureSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
