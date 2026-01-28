@@ -77,13 +77,30 @@ export async function GET(request: NextRequest) {
       dateTo: date,
     };
     
-    // Don't filter by league - get all matches
-    // if (leagueId) {
-    //   params.competitions = leagueId;
-    // }
-
-    // Fetch from Football-Data API
-    const response = await footballDataGet<any>('/matches', params);
+    // Free tier requires specific competition endpoints
+    let response: any;
+    if (leagueId) {
+      // Use competition-specific endpoint: /v4/competitions/{id}/matches
+      response = await footballDataGet<any>(`/competitions/${leagueId}/matches`, params);
+    } else {
+      // For "all leagues", query each free tier league separately
+      const freeLeagues = ['PL', 'CL', 'BL1', 'SA', 'PD', 'FL1', 'ELC', 'DED', 'PPL', 'BSA', 'WC', 'EC'];
+      const allMatches: any[] = [];
+      
+      for (const league of freeLeagues) {
+        try {
+          const leagueResponse = await footballDataGet<any>(`/competitions/${league}/matches`, params);
+          if (leagueResponse.matches) {
+            allMatches.push(...leagueResponse.matches);
+          }
+        } catch (err) {
+          // Skip leagues with no data
+          console.log(`No matches for ${league}`);
+        }
+      }
+      
+      response = { matches: allMatches };
+    }
 
     console.log('Football-Data API Response:', {
       resultSet: response.resultSet,
