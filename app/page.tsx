@@ -24,7 +24,7 @@ export default function Home() {
   const today = new Date().toISOString().split('T')[0];
   
   const [date, setDate] = useState(today);
-  const [leagueId, setLeagueId] = useState('PL'); // Premier League
+  const [leagueId, setLeagueId] = useState(''); // Empty = all leagues
   const [fixtures, setFixtures] = useState<FixtureSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -81,14 +81,30 @@ export default function Home() {
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              style={{ marginLeft: '0.5rem', padding: '0.25rem' }}
+              style={{ marginLeft: '0.5rem', padding: '0.25rem', width: '150px' }}
             />
           </label>
+          <button
+            onClick={() => setDate(today)}
+            style={{ marginLeft: '0.5rem', padding: '0.25rem 0.5rem', fontSize: '0.85rem' }}
+          >
+            Today
+          </button>
+          <button
+            onClick={() => {
+              const tomorrow = new Date();
+              tomorrow.setDate(tomorrow.getDate() + 1);
+              setDate(tomorrow.toISOString().split('T')[0]);
+            }}
+            style={{ marginLeft: '0.25rem', padding: '0.25rem 0.5rem', fontSize: '0.85rem' }}
+          >
+            Tomorrow
+          </button>
         </div>
 
         <div style={{ marginBottom: '1rem' }}>
           <label htmlFor="league">
-            League:
+            League (optional):
             <select
               id="league"
               name="league"
@@ -96,6 +112,7 @@ export default function Home() {
               onChange={(e) => setLeagueId(e.target.value)}
               style={{ marginLeft: '0.5rem', padding: '0.25rem' }}
             >
+              <option value="">All Leagues</option>
               <option value="PL">Premier League</option>
               <option value="CL">Champions League</option>
               <option value="ELC">Championship</option>
