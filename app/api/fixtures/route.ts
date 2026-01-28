@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { apiSportsGet } from '@/lib/apisports/client';
-import { mapFixtureToSummary } from '@/lib/apisports/map';
+import { footballDataGet } from '@/lib/apisports/client';
 import { ApiResponse, FixtureSummary, ErrorShape } from '@/lib/types';
 import cache from '@/lib/cache/memoryCache';
 
@@ -20,29 +19,20 @@ function isValidDate(dateString: string): boolean {
 }
 
 /**
- * Validate season format (4-digit year)
- */
-function isValidSeason(season: string): boolean {
-  const regex = /^\d{4}$/;
-  return regex.test(season);
-}
-
-/**
  * GET /api/fixtures
- * Query params: date (YYYY-MM-DD), leagueId (number), season (YYYY)
+ * Query params: date (YYYY-MM-DD), leagueId (competition code like 'PL', 'CL', etc)
  */
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const date = searchParams.get('date');
     const leagueId = searchParams.get('leagueId');
-    const season = searchParams.get('season');
 
     // Validate required parameters
-    if (!date || !leagueId || !season) {
+    if (!date) {
       const error: ErrorShape = {
         error: 'MISSING_PARAMETERS',
-        message: 'Required parameters: date (YYYY-MM-DD), leagueId, season (YYYY)',
+        message: 'Required parameter: date (YYYY-MM-DD)',
         code: 'VALIDATION_ERROR',
       };
       return NextResponse.json({ ok: false, error }, { status: 400 });
@@ -58,39 +48,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ ok: false, error }, { status: 400 });
     }
 
-    // Validate season format
-    if (!isValidSeason(season)) {
-      const error: ErrorShape = {
-        error: 'INVALID_SEASON',
-        message: 'Season must be a 4-digit year (e.g., 2024)',
-        code: 'VALIDATION_ERROR',
-      };
-      return NextResponse.json({ ok: false, error }, { status: 400 });
-    }
-
-    // Validate leagueId is a number
-    const leagueIdNum = parseInt(leagueId, 10);
-    if (isNaN(leagueIdNum)) {
-      const error: ErrorShape = {
-        error: 'INVALID_LEAGUE_ID',
-        message: 'League ID must be a valid number',
-        code: 'VALIDATION_ERROR',
-      };
-      return NextResponse.json({ ok: false, error }, { status: 400 });
-    }
-
     // Check if API key is set
-    if (!process.env.APISPORTS_API_KEY) {
+    if (!process.env.FOOTBALL_DATA_API_KEY) {
       const error: ErrorShape = {
         error: 'MISSING_API_KEY',
-        message: 'API-Sports API key is not configured',
+        message: 'Football-Data API key is not configured',
         code: 'CONFIGURATION_ERROR',
       };
       return NextResponse.json({ ok: false, error }, { status: 500 });
     }
 
     // Generate cache key
-    const cacheKey = `fixtures:${date}:${leagueId}:${season}`;
+    const cacheKey = `fixtures:${date}:${leagueId || 'all'}`;
 
     // Check cache first
     const cachedData = cache.get<FixtureSummary[]>(cacheKey);
@@ -102,17 +71,36 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Fetch from API-Sports
-    const response = await apiSportsGet<ApiResponse<any[]>>('/fixtures', {
-      date,
-      league: leagueIdNum,
-      season: parseInt(season, 10),
-    });
+    // Build query parameters
+    const params: Record<string, string> = {
+      dateFrom: date,
+      dateTo: date,
+    };
+    
+    if (leagueId) {
+      params.competitions = leagueId;
+    }
 
-    // Normalize to FixtureSummary[]
-    const fixtures: FixtureSummary[] = response.response.map((raw: any) =>
-      mapFixtureToSummary(raw)
-    );
+    // Fetch from Football-Data API
+    const response = await footballDataGet<any>('/matches', params);
+
+    // Map to FixtureSummary format
+    const fixtures: FixtureSummary[] = (response.matches || []).map((match: any) => ({
+      id: match.id,
+      date: match.utcDate,
+      teams: {
+        home: { name: match.homeTeam.name },
+        away: { name: match.awayTeam.name },
+      },
+      status: {
+        short: match.status === 'FINISHED' ? 'FT' : match.status === 'IN_PLAY' ? 'LIVE' : 'NS',
+        long: match.status,
+      },
+      score: match.score?.fullTime ? {
+        home: match.score.fullTime.home,
+        away: match.score.fullTime.away,
+      } : undefined,
+    }));
 
     // Cache the result
     cache.set(cacheKey, fixtures, CACHE_TTL_MS);
@@ -128,8 +116,8 @@ export async function GET(request: NextRequest) {
       message: error.message,
       stack: error.stack,
       name: error.name,
-      apiKeySet: !!process.env.APISPORTS_API_KEY,
-      apiKeyLength: process.env.APISPORTS_API_KEY?.length || 0,
+      apiKeySet: !!process.env.FOOTBALL_DATA_API_KEY,
+      apiKeyLength: process.env.FOOTBALL_DATA_API_KEY?.length || 0,
     });
 
     const errorResponse: ErrorShape = {

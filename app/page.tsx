@@ -13,14 +13,18 @@ interface FixtureSummary {
     short: string;
     long: string;
   };
+  score?: {
+    home: number | null;
+    away: number | null;
+  };
 }
 
 export default function Home() {
-  // Free API plan: Only historical data from seasons 2022-2024
-  // Using a date from Premier League 2023-24 season finale
-  const [date, setDate] = useState('2024-05-19');
-  const [leagueId, setLeagueId] = useState('39');
-  const [season, setSeason] = useState('2023');
+  // Use today's date - football-data.org supports current matches!
+  const today = new Date().toISOString().split('T')[0];
+  
+  const [date, setDate] = useState(today);
+  const [leagueId, setLeagueId] = useState('PL'); // Premier League
   const [fixtures, setFixtures] = useState<FixtureSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -32,7 +36,7 @@ export default function Home() {
 
     try {
       const response = await fetch(
-        `/api/fixtures?date=${date}&leagueId=${leagueId}&season=${season}`
+        `/api/fixtures?date=${date}&leagueId=${leagueId}`
       );
       const data = await response.json();
 
@@ -41,9 +45,9 @@ export default function Home() {
         return;
       }
 
-      setFixtures(data.data);
+      setFixtures(data.data || []);
     } catch (err: any) {
-      setError(err.message || 'Failed to fetch fixtures');
+      setError(err.message || 'Network error');
     } finally {
       setLoading(false);
     }
@@ -51,110 +55,76 @@ export default function Home() {
 
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toISOString().replace('T', ' ').substring(0, 16) + ' UTC';
+    return date.toLocaleString('sv-SE', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
   return (
-    <main style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}>
-      <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '2rem' }}>
-        TheBetCalc – Fixtures
-      </h1>
-
-      {/* Input Form */}
+    <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
+      <h1>TheBetCalc - Football Fixtures</h1>
+      
       <div style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem' }}>
-              Date (YYYY-MM-DD)
-            </label>
+        <div style={{ marginBottom: '1rem' }}>
+          <label>
+            Date:
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              style={{
-                padding: '0.5rem',
-                borderRadius: '4px',
-                border: '1px solid #ccc',
-                fontSize: '1rem',
-              }}
+              style={{ marginLeft: '0.5rem', padding: '0.25rem' }}
             />
-          </div>
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem' }}>
-              League ID
-            </label>
-            <input
-              type="number"
+          </label>
+        </div>
+
+        <div style={{ marginBottom: '1rem' }}>
+          <label>
+            League:
+            <select
               value={leagueId}
               onChange={(e) => setLeagueId(e.target.value)}
-              placeholder="39 (Premier League)"
-              style={{
-                padding: '0.5rem',
-                borderRadius: '4px',
-                border: '1px solid #ccc',
-                fontSize: '1rem',
-                width: '180px',
-              }}
-            />
-          </div>
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem' }}>
-              Season
-            </label>
-            <input
-              type="number"
-              value={season}
-              onChange={(e) => setSeason(e.target.value)}
-              placeholder="2024"
-              style={{
-                padding: '0.5rem',
-                borderRadius: '4px',
-                border: '1px solid #ccc',
-                fontSize: '1rem',
-                width: '100px',
-              }}
-            />
-          </div>
+              style={{ marginLeft: '0.5rem', padding: '0.25rem' }}
+            >
+              <option value="PL">Premier League</option>
+              <option value="CL">Champions League</option>
+              <option value="ELC">Championship</option>
+              <option value="BL1">Bundesliga</option>
+              <option value="SA">Serie A</option>
+              <option value="PD">La Liga</option>
+              <option value="FL1">Ligue 1</option>
+            </select>
+          </label>
         </div>
+
         <button
           onClick={fetchFixtures}
           disabled={loading}
           style={{
-            padding: '0.75rem 1.5rem',
-            background: loading ? '#ccc' : '#0070f3',
+            padding: '0.5rem 1rem',
+            backgroundColor: '#0070f3',
             color: 'white',
             border: 'none',
             borderRadius: '4px',
             cursor: loading ? 'not-allowed' : 'pointer',
-            fontSize: '1rem',
-            fontWeight: '500',
           }}
         >
-          {loading ? 'Loading...' : 'Hämta matcher'}
+          {loading ? 'Loading...' : 'Fetch Fixtures'}
         </button>
       </div>
 
-      {/* Error Display */}
       {error && (
-        <div
-          style={{
-            background: '#fee',
-            color: '#c00',
-            padding: '1rem',
-            borderRadius: '4px',
-            marginBottom: '1rem',
-          }}
-        >
-          {error}
+        <div style={{ padding: '1rem', backgroundColor: '#fee', border: '1px solid #fcc', borderRadius: '4px', marginBottom: '1rem' }}>
+          <strong>Error:</strong> {error}
         </div>
       )}
 
-      {/* Fixtures List */}
       {fixtures.length > 0 && (
         <div>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1rem' }}>
-            Fixtures ({fixtures.length})
-          </h2>
+          <h2>{fixtures.length} Fixtures Found</h2>
           <ul style={{ listStyle: 'none', padding: 0 }}>
             {fixtures.map((fixture) => (
               <li
@@ -162,17 +132,21 @@ export default function Home() {
                 style={{
                   padding: '1rem',
                   marginBottom: '0.5rem',
-                  background: '#f9f9f9',
+                  border: '1px solid #ddd',
                   borderRadius: '4px',
-                  border: '1px solid #e0e0e0',
                 }}
               >
-                <div style={{ fontWeight: '500', fontSize: '1.125rem' }}>
+                <div style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>
                   {fixture.teams.home.name} vs {fixture.teams.away.name}
                 </div>
-                <div style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.25rem' }}>
-                  {formatDateTime(fixture.date)} — {fixture.status.long}
+                <div style={{ fontSize: '0.9rem', color: '#666' }}>
+                  {formatDateTime(fixture.date)} • Status: {fixture.status.long}
                 </div>
+                {fixture.score && (
+                  <div style={{ marginTop: '0.5rem', fontSize: '1.2rem' }}>
+                    Score: {fixture.score.home} - {fixture.score.away}
+                  </div>
+                )}
               </li>
             ))}
           </ul>
@@ -180,10 +154,8 @@ export default function Home() {
       )}
 
       {!loading && !error && fixtures.length === 0 && (
-        <div style={{ textAlign: 'center', color: '#666', padding: '2rem' }}>
-          No fixtures loaded. Select date and league, then click &quot;Hämta matcher&quot;.
-        </div>
+        <p style={{ color: '#666' }}>No fixtures found. Try a different date or league.</p>
       )}
-    </main>
+    </div>
   );
 }
