@@ -50,11 +50,19 @@ export async function apiSportsGet<T = any>(
         'x-apisports-key': getApiKey(),
       },
       signal: controller.signal,
+      cache: 'no-store', // Disable Next.js cache
     });
 
     clearTimeout(timeoutId);
 
     if (!response.ok) {
+      const responseText = await response.text();
+      console.error('API-Sports HTTP error:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: responseText,
+        url,
+      });
       throw new Error(`API-Sports request failed: ${response.status} ${response.statusText}`);
     }
 

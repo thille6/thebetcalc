@@ -124,6 +124,13 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: any) {
     console.error('Error fetching fixtures:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      apiKeySet: !!process.env.APISPORTS_API_KEY,
+      apiKeyLength: process.env.APISPORTS_API_KEY?.length || 0,
+    });
 
     const errorResponse: ErrorShape = {
       error: 'INTERNAL_ERROR',
