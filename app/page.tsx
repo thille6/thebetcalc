@@ -16,11 +16,10 @@ interface FixtureSummary {
 }
 
 export default function Home() {
-  const today = new Date().toISOString().split('T')[0];
-  
-  const [date, setDate] = useState(today);
+  // Free API plan only supports historical data (2022-2024)
+  const [date, setDate] = useState('2024-05-11');
   const [leagueId, setLeagueId] = useState('39');
-  const [season, setSeason] = useState('2026');
+  const [season, setSeason] = useState('2024');
   const [fixtures, setFixtures] = useState<FixtureSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
