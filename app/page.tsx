@@ -73,9 +73,11 @@ export default function Home() {
       
       <div style={{ marginBottom: '2rem' }}>
         <div style={{ marginBottom: '1rem' }}>
-          <label>
+          <label htmlFor="date">
             Date:
             <input
+              id="date"
+              name="date"
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
@@ -85,9 +87,11 @@ export default function Home() {
         </div>
 
         <div style={{ marginBottom: '1rem' }}>
-          <label>
+          <label htmlFor="league">
             League:
             <select
+              id="league"
+              name="league"
               value={leagueId}
               onChange={(e) => setLeagueId(e.target.value)}
               style={{ marginLeft: '0.5rem', padding: '0.25rem' }}
