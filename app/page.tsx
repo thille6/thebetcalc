@@ -20,10 +20,11 @@ interface FixtureSummary {
 }
 
 export default function Home() {
-  // Use today's date - football-data.org supports current matches!
-  const today = new Date().toISOString().split('T')[0];
+  // Default to tomorrow - more likely to have matches scheduled
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
   
-  const [date, setDate] = useState(today);
+  const [date, setDate] = useState(tomorrow.toISOString().split('T')[0]);
   const [leagueId, setLeagueId] = useState(''); // Empty = all leagues
   const [fixtures, setFixtures] = useState<FixtureSummary[]>([]);
   const [loading, setLoading] = useState(false);
@@ -67,8 +68,8 @@ export default function Home() {
   return (
     <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
       <h1>TheBetCalc - Football Fixtures</h1>
-      <p style={{ color: '#666', marginBottom: '2rem' }}>
-        Showing all matches worldwide for the selected date
+      <p style={{ color: '#666', marginBottom: '1rem', fontSize: '0.9rem' }}>
+        Free tier access - showing matches from supported competitions
       </p>
       
       <div style={{ marginBottom: '2rem' }}>
@@ -85,7 +86,10 @@ export default function Home() {
             />
           </label>
           <button
-            onClick={() => setDate(today)}
+            onClick={() => {
+              const today = new Date();
+              setDate(today.toISOString().split('T')[0]);
+            }}
             style={{ marginLeft: '0.5rem', padding: '0.25rem 0.5rem', fontSize: '0.85rem' }}
           >
             Today

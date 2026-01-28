@@ -85,6 +85,12 @@ export async function GET(request: NextRequest) {
     // Fetch from Football-Data API
     const response = await footballDataGet<any>('/matches', params);
 
+    console.log('Football-Data API Response:', {
+      resultSet: response.resultSet,
+      matchesCount: response.matches?.length || 0,
+      filters: response.filters,
+    });
+
     // Map to FixtureSummary format
     const fixtures: FixtureSummary[] = (response.matches || []).map((match: any) => ({
       id: match.id,
