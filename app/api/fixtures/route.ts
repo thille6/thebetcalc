@@ -77,9 +77,10 @@ export async function GET(request: NextRequest) {
       dateTo: date,
     };
     
-    if (leagueId) {
-      params.competitions = leagueId;
-    }
+    // Don't filter by league - get all matches
+    // if (leagueId) {
+    //   params.competitions = leagueId;
+    // }
 
     // Fetch from Football-Data API
     const response = await footballDataGet<any>('/matches', params);

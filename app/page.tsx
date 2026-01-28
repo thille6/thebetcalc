@@ -67,6 +67,9 @@ export default function Home() {
   return (
     <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
       <h1>TheBetCalc - Football Fixtures</h1>
+      <p style={{ color: '#666', marginBottom: '2rem' }}>
+        Showing all matches worldwide for the selected date
+      </p>
       
       <div style={{ marginBottom: '2rem' }}>
         <div style={{ marginBottom: '1rem' }}>
